@@ -2,15 +2,21 @@ package com.dps.library.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 public class BookDto {
     private Long id;
 
     @NotBlank(message = "ISBN is required")
+    @Pattern(regexp = "[0-9Xx-]{10,17}", message = "ISBN must contain 10 or 13 digits")
     private String isbn;
 
     @NotBlank(message = "Title is required")
+    @Size(max = 255, message = "Title must be at most 255 characters")
     private String title;
 
     private String subtitle;
@@ -18,6 +24,7 @@ public class BookDto {
     private Long authorId;
 
     @NotBlank(message = "Author name is required")
+    @Size(max = 150, message = "Author name must be at most 150 characters")
     private String authorName;
 
     private Long categoryId;
@@ -30,8 +37,10 @@ public class BookDto {
     private String coverImage;
 
     @NotNull(message = "Total copies is required")
+    @Min(value = 1, message = "Total copies must be greater than zero")
     private Integer totalCopies;
 
+    @Min(value = 0, message = "Available copies cannot be negative")
     private Integer availableCopies;
     private String location;
     private String shelfNumber;
