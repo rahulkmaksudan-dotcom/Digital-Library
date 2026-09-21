@@ -1,10 +1,9 @@
 spring:
   datasource:
-    # Render supplies these values independently from its managed PostgreSQL
-    # service; JDBC_DATABASE_URL remains available for Supabase or local setups.
-    url: ${JDBC_DATABASE_URL:jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/${DATABASE_NAME:digital_library}}
-    username: ${DATABASE_USERNAME:postgres}
-    password: ${DATABASE_PASSWORD:postgres}
+    # Accept Spring Boot, Render, Supabase, and local environment variable names.
+    url: ${SPRING_DATASOURCE_URL:${JDBC_DATABASE_URL:${DATABASE_URL:jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/${DATABASE_NAME:digital_library}}}}
+    username: ${SPRING_DATASOURCE_USERNAME:${DATABASE_USERNAME:postgres}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${DATABASE_PASSWORD:postgres}}
     driverClassName: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
@@ -20,4 +19,4 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
-    locations: classpath:db/migration
+    locations: classpath:db/migration,classpath:db/migration-postgres

@@ -39,11 +39,17 @@ npm run dev
 1. Log in to [Supabase](https://supabase.com) and click **New Project**.
 2. Name the project `thakur-dps-library-db` and generate a strong database password.
 3. Select your preferred region (e.g. `ap-south-1` Mumbai or `us-east-1`).
-4. In **Project Settings** -> **Database**, copy the **Transaction Connection String (URI)**:
+4. In **Project Settings** -> **Database**, copy the **Direct connection string** or **Session pooler connection string**. Use the direct/session connection for Flyway migrations; do not use the Transaction pooler connection for schema migrations.
    ```
-   postgresql://postgres.[PROJECT_REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?sslmode=require
+   jdbc:postgresql://db.[PROJECT_REF].supabase.co:5432/postgres?sslmode=require
    ```
-5. You do **not** need to manually execute SQL scripts in the Supabase SQL editor! When the Spring Boot backend boots with the `postgres` profile, Flyway automatically executes migrations `V1` through `V6`.
+5. Configure the deployed backend with `SPRING_PROFILES_ACTIVE=postgres`, `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, and `SPRING_DATASOURCE_PASSWORD`. The Postgres profile also accepts the legacy `JDBC_DATABASE_URL` and `DATABASE_*` aliases.
+6. When the Spring Boot backend boots with the `postgres` profile, Flyway automatically executes every migration in `backend/src/main/resources/db/migration/` and the Postgres-only migrations in `backend/src/main/resources/db/migration-postgres/`.
+7. Do not edit a migration that has already run in Supabase. Add a new versioned migration, such as `V8__add_new_catalog_data.sql`, commit it, and redeploy the backend. Flyway will apply that new migration without dropping existing data.
+
+### Manual Supabase SQL Editor setup
+
+The Supabase SQL Editor does not support psql's `\i` include command. If you initialize Supabase manually, run `database/schema.sql` first and `database/seed_data.sql` second as separate SQL Editor queries. The `database/supabase_setup.sql` file documents this limitation; it is not an include script.
 
 ---
 
@@ -55,6 +61,16 @@ npm run dev
 4. Verify the API at `https://thakur-dps-library-backend.onrender.com/api/v1/health` and open the site at `https://thakur-dps-library-web.onrender.com`.
 
 If either Render service name is unavailable, rename it in `render.yaml` before creating the Blueprint, then update both the frontend `VITE_API_BASE_URL` and backend `CORS_ALLOWED_ORIGINS` values to the corresponding URLs.
+
+### Vercel frontend settings
+
+If the repository is imported from its root, set Vercel's **Root Directory** to `frontend`. Add this Vercel environment variable for Production, Preview, and Development:
+
+```text
+VITE_API_BASE_URL=https://thakur-dps-library-backend.onrender.com/api/v1
+```
+
+Redeploy Vercel after changing this variable. The frontend also has the same Render URL as a production fallback, but the Vercel variable is preferred.
 
 ---
 
