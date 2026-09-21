@@ -1,0 +1,104 @@
+# ==============================================================================
+# Docker Compose for Digital Library Management System
+# Institution: Thakur Shree DPS College of Engineering and Management
+# Project Team: Ashish Yadav, Rahul Yadav, Priyanshu Yadav
+# ==============================================================================
+
+version: '3.8'
+
+services:
+  # ----------------------------------------------------------------------------
+  # 1. PostgreSQL Database Service
+  # ----------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: dps-library-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: dps_library
+      POSTGRES_USER: dps_admin
+      POSTGRES_PASSWORD: dps_password123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dps_admin -d dps_library"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dps-network
+
+  # ----------------------------------------------------------------------------
+  # 2. Spring Boot Backend REST API Service
+  # ----------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: dps-library-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: postgres
+      SERVER_PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/dps_library
+      SPRING_DATASOURCE_USERNAME: dps_admin
+      SPRING_DATASOURCE_PASSWORD: dps_password123
+      JWT_SECRET: dGhha3VyLXNocmVlLWRwcy1jb2xsZWdlLWVuZ2luZWVyaW5nLW1hbmFnZW1lbnQtc2VjcmV0LWtleS0yMDI2
+      JWT_EXPIRATION_MS: 86400000
+      CORS_ALLOWED_ORIGINS: http://localhost:5173,http://localhost:3000,http://localhost:80
+      FILE_UPLOAD_DIR: /app/uploads
+    ports:
+      - "8080:8080"
+    volumes:
+      - backend_uploads:/app/uploads
+    networks:
+      - dps-network
+
+  # ----------------------------------------------------------------------------
+  # 3. React Frontend Web Application (Vite + Nginx)
+  # ----------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: dps-library-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      VITE_API_BASE_URL: http://localhost:8080/api/v1
+    ports:
+      - "80:80"
+      - "3000:80"
+    networks:
+      - dps-network
+
+  # ----------------------------------------------------------------------------
+  # 4. Optional Database Management GUI (Adminer)
+  # ----------------------------------------------------------------------------
+  adminer:
+    image: adminer:latest
+    container_name: dps-library-adminer
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    ports:
+      - "8081:8080"
+    networks:
+      - dps-network
+
+volumes:
+  postgres_data:
+    driver: local
+  backend_uploads:
+    driver: local
+
+networks:
+  dps-network:
+    driver: bridge
+

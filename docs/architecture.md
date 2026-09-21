@@ -1,0 +1,110 @@
+# Architecture & System Design Documentation
+## Digital Library Management System (DLMS)
+### Thakur Shree DPS College of Engineering and Management
+
+---
+
+## 1. Executive Summary & Purpose
+
+The **Digital Library Management System (DLMS)** is an institutional-grade, full-stack enterprise web platform engineered for **Thakur Shree DPS College of Engineering and Management**. The platform streamlines all textbook circulation workflows, manages physical inventory across campus shelf racks, provides digital academic resources (syllabi, lecture notes, lab manuals, and previous year question papers), calculates automated overdue fines at ₹2.00/day, manages student waitlist queues, and provides administrative analytics compliant with NBA and NAAC accreditation requirements.
+
+**Project Development Team:**
+- **Ashish Yadav** (Lead Full-Stack Engineer & Database Architect)
+- **Rahul Yadav** (Backend Systems & Security Architect)
+- **Priyanshu Yadav** (Frontend UI/UX & DevOps Engineer)
+
+---
+
+## 2. High-Level Architecture Diagram
+
+```
++-----------------------------------------------------------------------------------+
+|                                 CLIENT TIER                                       |
+|                                                                                   |
+|   +---------------------------------------------------------------------------+   |
+|   |         React 18 + TypeScript + Vite + Tailwind CSS Single Page App        |   |
+|   |                                                                           |   |
+|   |   [Public Portal]    [Student Portal]    [Librarian Desk]   [Admin Console]|  |
+|   |    - Home/Search      - My Loans (10d)   - Issue / Return    - Users/Roles  |   |
+|   |    - Catalog/ISBN     - Holds Queue      - Fines Cashier     - Settings     |   |
+|   |    - Digital Repo     - Pay Fines        - Waitlists         - Audit Logs   |   |
+|   |    - Auth (JWT)       - Book Requests    - Catalog Master    - CSV Exports  |   |
+|   +---------------------------------------------------------------------------+   |
++------------------------------------------+----------------------------------------+
+                                           |  HTTPS / REST JSON API
+                                           |  Bearer JWT Authentication
+                                           v
++-----------------------------------------------------------------------------------+
+|                              APPLICATION / API TIER                               |
+|                                                                                   |
+|   +---------------------------------------------------------------------------+   |
+|   |                    Java 21 LTS + Spring Boot 3.3.4                        |   |
+|   |                                                                           |   |
+|   |   [Security Filter Chain]  -->  [Controllers Layer (17 REST Endpoints)]   |   |
+|   |    - JJWT 0.12.5 Token Provider    - Auth, Books, Categories, Authors     |   |
+|   |    - BCrypt Password Hash          - Loans, Fines, Reservations, Requests |   |
+|   |    - CORS & Exception Handler      - Digital Resources, Analytics, Reports|   |
+|   |                                                                           |   |
+|   |   [Service Business Logic Layer]                                          |   |
+|   |    - 10-day loan policy evaluation                                        |   |
+|   |    - Dynamic fine calculation (₹2.00/day)                                 |   |
+|   |    - Scheduled cron tasks (due date alerts, midnight fine accruals)       |   |
+|   |    - Apache Commons CSV streaming exports                                 |   |
+|   |                                                                           |   |
+|   |   [Data Access Layer (Spring Data JPA / Hibernate)]                       |   |
+|   |    - 14 Repositories with custom JPQL & Derived Queries                   |   |
+|   |    - Connection Pooling (HikariCP)                                        |   |
+|   +---------------------------------------------------------------------------+   |
++------------------------------------------+----------------------------------------+
+                                           |  JDBC
+                                           v
++-----------------------------------------------------------------------------------+
+|                                  DATABASE TIER                                    |
+|                                                                                   |
+|   +---------------------------------------------------------------------------+   |
+|   |             PostgreSQL 16 (Production) / H2 In-Memory (Dev)               |   |
+|   |                                                                           |   |
+|   |   - Flyway Schema Migrations (V1 to V6 Versioned Scripts)                 |   |
+|   |   - Dual SQL syntax: BIGINT GENERATED BY DEFAULT AS IDENTITY              |   |
+|   |   - Normalized 3NF Relational Tables:                                     |   |
+|   |       * roles, users, categories, authors, books                          |   |
+|   |       * loans, fines, reservations, favorites                             |   |
+|   |       * book_requests, digital_resources, notifications                   |   |
+|   |       * audit_logs, library_settings                                      |   |
+|   +---------------------------------------------------------------------------+   |
++-----------------------------------------------------------------------------------+
+```
+
+---
+
+## 3. Technology Stack & Decision Rationale
+
+### Frontend
+- **React 18 & TypeScript:** Strict typing prevents runtime exceptions; component-based architecture ensures clean separation of concerns.
+- **Vite:** High-performance ESM bundler offering sub-second Hot Module Replacement (HMR) and optimized minified production builds.
+- **Tailwind CSS:** Utility-first responsive design framework configured with the college's official navy and gold palette.
+- **Lucide React:** Lightweight, accessible, vector iconography for all library UI states.
+- **Axios:** Centralized HTTP client configured with automatic request authorization interceptors and standardized error handling.
+
+### Backend
+- **Java 21 LTS:** High-performance, modern Java runtime utilizing record types, pattern matching, and enhanced garbage collection.
+- **Spring Boot 3.3.4:** Production-ready framework providing declarative transactions, dependency injection, and native containerization.
+- **Spring Security 6 & JJWT 0.12.5:** Stateless, claim-based authentication securing endpoints with role-based method security (`@PreAuthorize`).
+- **Spring Data JPA & Hibernate:** Object-Relational Mapping providing safe parameterized queries, automatic schema mapping, and pagination.
+- **Flyway:** Automated database migration versioning ensuring zero discrepancies between local development and cloud production.
+- **Apache Commons CSV:** Fast, low-memory streaming generation for audit reports and NAAC compliance spreadsheets.
+
+### Database
+- **PostgreSQL 16 (Supabase / Render):** Enterprise ACID-compliant relational database with strong indexing, JSON support, and robust concurrency control.
+- **H2 Database:** In-memory fallback mode allowing instant evaluation without external database installation.
+
+---
+
+## 4. Multi-Tenant Role-Based Access Model
+
+The system enforces 4 distinct institutional personas:
+1. **ROLE_STUDENT:** Can search catalog, view personal active 10-day loans, track due dates, place reservation holds, save favorite textbooks, request new acquisitions, review late fines, download approved course syllabi, and receive in-app notifications.
+2. **ROLE_FACULTY:** Can access academic textbook repositories, upload semester lecture notes and question papers for librarian review, and borrow curriculum reference materials.
+3. **ROLE_LIBRARIAN:** Full operational control over the circulation desk: issuing books with student roll number lookup, processing book returns, inspecting returned book conditions, collecting overdue fines, managing reservation waitlists, reviewing book purchase requests, and downloading circulation CSV reports.
+4. **ROLE_ADMIN:** Central institutional oversight: managing all user accounts, creating engineering departments/categories, maintaining author records, configuring global circulation policies (loan duration, fine rates), inspecting system audit logs, and reviewing campus-wide analytics.
+
