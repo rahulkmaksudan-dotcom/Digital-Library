@@ -2,39 +2,21 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { BookOpen, LogIn, Lock, Mail, GraduationCap, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { useToast } from '../../context/ToastContext';
 
 export const Login: React.FC = () => {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { login, isAdmin, isLibrarian } = useAuth();
-  const { error } = useToast();
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const normalizedIdentifier = identifier.trim();
-    const isEmail = normalizedIdentifier.includes('@');
-    const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedIdentifier);
-    const validStudentId = /^[A-Za-z0-9][A-Za-z0-9_-]{2,}$/.test(normalizedIdentifier);
-
-    if (!normalizedIdentifier || !password) {
-      error('Enter your email or student ID and password.');
-      return;
-    }
-    if ((isEmail && !validEmail) || (!isEmail && !validStudentId)) {
-      error('Enter a valid email address or student ID.');
-      return;
-    }
+    if (!identifier.trim() || !password) return;
 
     setLoading(true);
     try {
-      const loginIdentifier = isEmail
-        ? normalizedIdentifier.toLowerCase()
-        : normalizedIdentifier.toUpperCase();
-      await login(loginIdentifier, password);
+      await login(identifier.trim(), password);
       // Determine redirection based on role
       const savedUser = JSON.parse(localStorage.getItem('dlms_user') || '{}');
       if (savedUser.role === 'ADMIN') {

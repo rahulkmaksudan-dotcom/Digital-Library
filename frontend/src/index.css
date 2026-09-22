@@ -4,13 +4,8 @@
 
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-900 antialiased font-sans;
+    @apply bg-slate-50 text-slate-900 antialiased font-sans selection:bg-dps-100 selection:text-dps-900;
   }
-}
-
-::selection {
-  background-color: #d9eaff;
-  color: #19338d;
 }
 
 /* Custom subtle scrollbar */

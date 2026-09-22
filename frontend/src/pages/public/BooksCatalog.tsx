@@ -13,8 +13,6 @@ export const BooksCatalog: React.FC = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const [retryToken, setRetryToken] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [totalElements, setTotalElements] = useState(0);
 
@@ -37,7 +35,6 @@ export const BooksCatalog: React.FC = () => {
   useEffect(() => {
     const fetchBooks = async () => {
       setLoading(true);
-      setLoadError(null);
       try {
         const response = await bookService.searchBooks({
           query: query || undefined,
@@ -55,17 +52,13 @@ export const BooksCatalog: React.FC = () => {
         setTotalElements(response.totalElements);
       } catch (err) {
         console.error('Error fetching catalog books:', err);
-        setBooks([]);
-        setTotalPages(1);
-        setTotalElements(0);
-        setLoadError('The catalog is taking too long to respond. Please try again.');
       } finally {
         setLoading(false);
       }
     };
 
     fetchBooks();
-  }, [query, categoryId, bookType, availableOnly, sortBy, direction, page, retryToken]);
+  }, [query, categoryId, bookType, availableOnly, sortBy, direction, page]);
 
   const updateFilters = (newParams: Record<string, string | null>) => {
     const current = new URLSearchParams(searchParams);
@@ -212,14 +205,6 @@ export const BooksCatalog: React.FC = () => {
             <BookCardSkeleton key={i} />
           ))}
         </div>
-      ) : loadError ? (
-        <EmptyState
-          icon={BookOpen}
-          title="Catalog unavailable"
-          description={loadError}
-          actionLabel="Try Again"
-          onAction={() => setRetryToken((value) => value + 1)}
-        />
       ) : books.length === 0 ? (
         <EmptyState
           icon={BookOpen}

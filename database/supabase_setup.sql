@@ -14,8 +14,7 @@
 --    DATABASE_PASSWORD=<YOUR-SUPABASE-DB-PASSWORD>
 -- ==============================================================================
 
--- Supabase SQL Editor does not support psql's \i include command.
--- Run database/schema.sql first, then database/seed_data.sql in two SQL Editor
--- queries. For a deployed backend, prefer the Flyway migrations instead:
--- set SPRING_PROFILES_ACTIVE=postgres and configure the datasource variables.
+-- Include full schema and initial records
+\i schema.sql
+\i seed_data.sql
 

@@ -39,38 +39,36 @@ npm run dev
 1. Log in to [Supabase](https://supabase.com) and click **New Project**.
 2. Name the project `thakur-dps-library-db` and generate a strong database password.
 3. Select your preferred region (e.g. `ap-south-1` Mumbai or `us-east-1`).
-4. In **Project Settings** -> **Database**, copy the **Direct connection string** or **Session pooler connection string**. Use the direct/session connection for Flyway migrations; do not use the Transaction pooler connection for schema migrations.
+4. In **Project Settings** -> **Database**, copy the **Transaction Connection String (URI)**:
    ```
-   jdbc:postgresql://db.[PROJECT_REF].supabase.co:5432/postgres?sslmode=require
+   postgresql://postgres.[PROJECT_REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?sslmode=require
    ```
-5. Configure the deployed backend with `SPRING_PROFILES_ACTIVE=postgres`, `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, and `SPRING_DATASOURCE_PASSWORD`. The Postgres profile also accepts the legacy `JDBC_DATABASE_URL` and `DATABASE_*` aliases.
-6. When the Spring Boot backend boots with the `postgres` profile, Flyway automatically executes every migration in `backend/src/main/resources/db/migration/` and the Postgres-only migrations in `backend/src/main/resources/db/migration-postgres/`.
-7. Do not edit a migration that has already run in Supabase. Add a new versioned migration, such as `V8__add_new_catalog_data.sql`, commit it, and redeploy the backend. Flyway will apply that new migration without dropping existing data.
-
-### Manual Supabase SQL Editor setup
-
-The Supabase SQL Editor does not support psql's `\i` include command. If you initialize Supabase manually, run `database/schema.sql` first and `database/seed_data.sql` second as separate SQL Editor queries. The `database/supabase_setup.sql` file documents this limitation; it is not an include script.
+5. You do **not** need to manually execute SQL scripts in the Supabase SQL editor! When the Spring Boot backend boots with the `postgres` profile, Flyway automatically executes migrations `V1` through `V6`.
 
 ---
 
-## 3. Production Deployment: Render (Full Stack)
+## 3. Production Deployment: Render (Backend REST API)
 
-1. Log in to [Render](https://render.com) and click **New** -> **Blueprint**.
-2. Select this GitHub repository and the `main` branch. Render finds the root `render.yaml` and provisions the API, PostgreSQL database, and frontend together.
-3. The Blueprint generates the JWT secret and securely wires database credentials; do not commit separate production secrets.
-4. Verify the API at `https://thakur-dps-library-backend.onrender.com/api/v1/health` and open the site at `https://thakur-dps-library-web.onrender.com`.
+1. Log in to [Render](https://render.com) and click **New** -> **Web Service**.
+2. Connect your GitHub repository: `your-username/thakur-dps-library`.
+3. Set **Root Directory** to `backend`.
+4. Select **Docker** as the Runtime (it automatically detects `backend/Dockerfile`).
+5. Choose the **Free** instance type.
+6. Configure the following **Environment Variables**:
 
-If either Render service name is unavailable, rename it in `render.yaml` before creating the Blueprint, then update both the frontend `VITE_API_BASE_URL` and backend `CORS_ALLOWED_ORIGINS` values to the corresponding URLs.
+| Variable Name | Value | Description |
+| :--- | :--- | :--- |
+| `SPRING_PROFILES_ACTIVE` | `postgres` | Enables PostgreSQL mode |
+| `PORT` | `8080` | Render internal port |
+| `SPRING_DATASOURCE_URL` | `jdbc:postgresql://aws-0...supabase.com:6543/postgres?sslmode=require` | Supabase JDBC URL |
+| `SPRING_DATASOURCE_USERNAME` | `postgres.[PROJECT_REF]` | Supabase username |
+| `SPRING_DATASOURCE_PASSWORD` | `[YOUR_SUPABASE_PASSWORD]` | Supabase password |
+| `JWT_SECRET` | `dGhha3VyLXNocmVlLWRwcy1jb2xsZWdlLWVuZ2luZWVyaW5nLW1hbmFnZW1lbnQtc2VjcmV0LWtleS0yMDI2` | 256-bit+ HMAC key |
+| `JWT_EXPIRATION_MS` | `86400000` | 24 Hours in ms |
+| `CORS_ALLOWED_ORIGINS` | `https://thakur-dps-library.vercel.app` | Vercel frontend URL |
 
-### Vercel frontend settings
-
-If the repository is imported from its root, set Vercel's **Root Directory** to `frontend`. Add this Vercel environment variable for Production, Preview, and Development:
-
-```text
-VITE_API_BASE_URL=https://thakur-dps-library-backend.onrender.com/api/v1
-```
-
-Redeploy Vercel after changing this variable. The frontend also has the same Render URL as a production fallback, but the Vercel variable is preferred.
+7. Click **Deploy Web Service**.
+8. Verify health status at `https://your-app.onrender.com/api/v1/health`.
 
 ---
 
@@ -112,3 +110,4 @@ To stop all containers:
 ```bash
 docker-compose down
 ```
+

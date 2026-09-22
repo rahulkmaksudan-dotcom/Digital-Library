@@ -3,7 +3,6 @@ node_modules/
 target/
 dist/
 build/
-*.tsbuildinfo
 
 # Environment and Secrets
 .env
@@ -55,3 +54,4 @@ tmp/
 # Database / H2 Files
 *.mv.db
 *.trace.db
+

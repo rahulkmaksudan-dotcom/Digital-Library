@@ -18,7 +18,6 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
     Page<Loan> findByUserIdAndStatus(Long userId, String status, Pageable pageable);
     List<Loan> findByUserIdAndStatus(Long userId, String status);
     long countByUserIdAndStatus(Long userId, String status);
-    long countByBookIdAndStatus(Long bookId, String status);
 
     Page<Loan> findByStatus(String status, Pageable pageable);
     long countByStatus(String status);

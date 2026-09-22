@@ -89,11 +89,8 @@ public class BookService {
 
     @Transactional
     public BookDto createBook(BookDto dto, Long adminId, String adminEmail) {
-        String normalizedIsbn = normalizeIsbn(dto.getIsbn());
-        dto.setIsbn(normalizedIsbn);
-        validateCopyCounts(dto);
-        if (bookRepository.existsByIsbn(normalizedIsbn)) {
-            throw new BadRequestException("Book with ISBN " + normalizedIsbn + " already exists.");
+        if (bookRepository.existsByIsbn(dto.getIsbn())) {
+            throw new BadRequestException("Book with ISBN " + dto.getIsbn() + " already exists.");
         }
 
         Book book = new Book();
@@ -118,11 +115,8 @@ public class BookService {
         Book book = bookRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Book not found with id: " + id));
 
-        String normalizedIsbn = normalizeIsbn(dto.getIsbn());
-        dto.setIsbn(normalizedIsbn);
-        validateCopyCounts(dto);
-        if (!book.getIsbn().equals(normalizedIsbn) && bookRepository.existsByIsbn(normalizedIsbn)) {
-            throw new BadRequestException("Another book with ISBN " + normalizedIsbn + " already exists.");
+        if (!book.getIsbn().equals(dto.getIsbn()) && bookRepository.existsByIsbn(dto.getIsbn())) {
+            throw new BadRequestException("Another book with ISBN " + dto.getIsbn() + " already exists.");
         }
 
         mapFromDto(dto, book);
@@ -142,7 +136,7 @@ public class BookService {
             .orElseThrow(() -> new ResourceNotFoundException("Book not found with id: " + id));
 
         // Check if there are active loans
-        if (loanRepository.countByBookIdAndStatus(book.getId(), "ACTIVE") > 0) {
+        if (loanRepository.countByUserIdAndStatus(book.getId(), "ACTIVE") > 0) {
             throw new BadRequestException("Cannot delete book while active loans exist. Archive it instead.");
         }
 
@@ -188,14 +182,11 @@ public class BookService {
     private void mapFromDto(BookDto dto, Book book) {
         book.setIsbn(dto.getIsbn().trim());
         book.setTitle(dto.getTitle().trim());
-        book.setSubtitle(trimToNull(dto.getSubtitle()));
+        book.setSubtitle(dto.getSubtitle());
         book.setAuthorName(dto.getAuthorName().trim());
 
         if (dto.getAuthorId() != null) {
-            Author author = authorRepository.findById(dto.getAuthorId())
-                .orElseThrow(() -> new BadRequestException("Selected author does not exist."));
-            book.setAuthor(author);
-            book.setAuthorName(author.getName());
+            authorRepository.findById(dto.getAuthorId()).ifPresent(book::setAuthor);
         } else if (dto.getAuthorName() != null) {
             Author author = authorRepository.findByName(dto.getAuthorName())
                 .orElseGet(() -> authorRepository.save(new Author(null, dto.getAuthorName(), "", "Unknown")));
@@ -203,44 +194,27 @@ public class BookService {
         }
 
         if (dto.getCategoryId() != null) {
-            Category category = categoryRepository.findById(dto.getCategoryId())
-                .orElseThrow(() -> new BadRequestException("Selected category does not exist."));
-            book.setCategory(category);
-            book.setCategoryName(category.getName());
+            categoryRepository.findById(dto.getCategoryId()).ifPresent(book::setCategory);
         } else if (dto.getCategoryName() != null) {
             categoryRepository.findByName(dto.getCategoryName()).ifPresent(book::setCategory);
         }
 
-        book.setCategoryName(book.getCategory() != null ? book.getCategory().getName() : trimToNull(dto.getCategoryName()));
-        book.setPublisher(trimToNull(dto.getPublisher()));
+        book.setCategoryName(dto.getCategoryName());
+        book.setPublisher(dto.getPublisher());
         book.setPublicationYear(dto.getPublicationYear());
-        book.setEdition(trimToNull(dto.getEdition()));
-        book.setLanguage(dto.getLanguage() != null && !dto.getLanguage().isBlank() ? dto.getLanguage().trim() : "English");
-        book.setDescription(trimToNull(dto.getDescription()));
-        book.setCoverImage(trimToNull(dto.getCoverImage()));
+        book.setEdition(dto.getEdition());
+        book.setLanguage(dto.getLanguage() != null ? dto.getLanguage() : "English");
+        book.setDescription(dto.getDescription());
+        book.setCoverImage(dto.getCoverImage());
         book.setTotalCopies(dto.getTotalCopies());
         if (dto.getAvailableCopies() != null) {
             book.setAvailableCopies(dto.getAvailableCopies());
         }
-        book.setLocation(trimToNull(dto.getLocation()));
-        book.setShelfNumber(trimToNull(dto.getShelfNumber()));
+        book.setLocation(dto.getLocation());
+        book.setShelfNumber(dto.getShelfNumber());
         book.setBookType(dto.getBookType() != null ? dto.getBookType() : "PHYSICAL");
         book.setDigitalAvailable(dto.getDigitalAvailable() != null ? dto.getDigitalAvailable() : false);
-        book.setDigitalFile(trimToNull(dto.getDigitalFile()));
-    }
-
-    private String normalizeIsbn(String isbn) {
-        return isbn == null ? "" : isbn.replaceAll("[-\\s]", "").toUpperCase();
-    }
-
-    private void validateCopyCounts(BookDto dto) {
-        if (dto.getAvailableCopies() != null && dto.getAvailableCopies() > dto.getTotalCopies()) {
-            throw new BadRequestException("Available copies cannot exceed total copies.");
-        }
-    }
-
-    private String trimToNull(String value) {
-        return value == null || value.isBlank() ? null : value.trim();
+        book.setDigitalFile(dto.getDigitalFile());
     }
 }
 

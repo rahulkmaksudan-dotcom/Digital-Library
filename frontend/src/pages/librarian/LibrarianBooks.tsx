@@ -158,47 +158,23 @@ export const LibrarianBooks: React.FC = () => {
 
   const handleSaveBook = async (e: React.FormEvent) => {
     e.preventDefault();
-    const title = formData.title.trim();
-    const isbn = formData.isbn.replace(/[-\s]/g, '');
-    const publisher = formData.publisher.trim();
-    const shelfNumber = formData.shelfLocation.trim();
-    const author = authors.find((item) => item.id === formData.authorId);
-    const category = categories.find((item) => item.id === formData.categoryId);
-    const totalCopies = Number(formData.totalCopies);
-
-    if (!title || !isbn || !shelfNumber || !author || !category) {
-      showToast('Complete the title, ISBN, author, category, and shelf location.', 'error');
-      return;
-    }
-    if (!/^\d{10,13}$/.test(isbn)) {
-      showToast('ISBN must contain 10 or 13 digits.', 'error');
-      return;
-    }
-    if (!Number.isInteger(totalCopies) || totalCopies < 1) {
-      showToast('Total copies must be a whole number greater than zero.', 'error');
-      return;
-    }
-
     setSubmitting(true);
     try {
       const payload: any = {
-        title,
-        isbn,
-        authorId: author.id,
-        authorName: author.name,
-        categoryId: category.id,
-        categoryName: category.name,
-        publisher,
+        title: formData.title,
+        isbn: formData.isbn,
+        publisher: formData.publisher,
         publicationYear: Number(formData.publicationYear),
         edition: formData.edition,
-        totalCopies,
-        shelfNumber,
+        totalCopies: Number(formData.totalCopies),
+        shelfLocation: formData.shelfLocation,
         description: formData.description,
         coverImage: formData.coverImage,
-        digitalAvailable: formData.isDigital,
-        digitalFile: formData.fileUrl,
-        bookType: formData.isDigital ? 'BOTH' : 'PHYSICAL',
+        isDigital: formData.isDigital,
+        fileUrl: formData.fileUrl,
         status: formData.status,
+        category: { id: formData.categoryId },
+        author: { id: formData.authorId },
       };
 
       if (isEditing && selectedBook) {
