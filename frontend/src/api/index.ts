@@ -1,4 +1,4 @@
-import { apiClient } from './client';
+import { apiClient, API_BASE_URL } from './client';
 import {
   ApiResponse,
   PagedResponse,
@@ -380,8 +380,7 @@ export const resourceService = {
   },
 
   getDownloadUrl: (fileName: string): string => {
-    const base = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
-    return `${base}/resources/download/${fileName}`;
+    return `${API_BASE_URL}/resources/download/${fileName}`;
   },
 };
 
@@ -494,8 +493,7 @@ export const auditLogService = {
 
 export const reportService = {
   getExportUrl: (type: 'books' | 'users' | 'loans' | 'fines'): string => {
-    const base = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
-    return `${base}/reports/export/${type}`;
+    return `${API_BASE_URL}/reports/export/${type}`;
   },
 };
 

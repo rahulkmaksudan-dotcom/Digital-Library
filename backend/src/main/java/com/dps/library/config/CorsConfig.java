@@ -23,8 +23,15 @@ public class CorsConfig {
 
         List<String> origins = Arrays.asList(allowedOrigins.split(","));
         for (String origin : origins) {
-            config.addAllowedOrigin(origin.trim());
+            String trimmed = origin.trim();
+            if (!trimmed.isEmpty()) {
+                config.addAllowedOrigin(trimmed);
+            }
         }
+
+        // Allow all Vercel deployments (production and preview URLs)
+        config.addAllowedOriginPattern("https://*.vercel.app");
+        config.addAllowedOriginPattern("https://vercel.app");
 
         // Also allow common dev origins dynamically if wildcard needed in development
         config.setAllowCredentials(true);

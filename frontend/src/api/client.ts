@@ -1,6 +1,21 @@
 import axios, { AxiosError } from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
+const getApiBaseUrl = (): string => {
+  const envUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim();
+  if (!envUrl) {
+    return 'http://localhost:8080/api/v1';
+  }
+  const cleanUrl = envUrl.replace(/\/+$/, '');
+  if (cleanUrl.endsWith('/api/v1')) {
+    return cleanUrl;
+  }
+  if (cleanUrl.endsWith('/api')) {
+    return `${cleanUrl}/v1`;
+  }
+  return `${cleanUrl}/api/v1`;
+};
+
+export const API_BASE_URL = getApiBaseUrl();
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -31,6 +46,8 @@ apiClient.interceptors.response.use(
       errorMessage = error.response.data.message;
     } else if (error.response?.data?.error) {
       errorMessage = error.response.data.error;
+    } else if (error.message === 'Network Error') {
+      errorMessage = 'Network Error: Cannot connect to server. If the backend is waking up from sleep, please wait 30 seconds and try again.';
     } else if (error.message) {
       errorMessage = error.message;
     }
