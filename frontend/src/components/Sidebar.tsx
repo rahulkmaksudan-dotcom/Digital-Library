@@ -33,7 +33,7 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onCloseMobile }) => {
-  const { user, isAdmin, isLibrarian, isStudent, logout } = useAuth();
+  const { user, isAdmin, isLibrarian, isFaculty, isStudent, logout } = useAuth();
   const navigate = useNavigate();
 
   // Student Links
@@ -82,8 +82,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen, onCloseMobile }) =
     { to: '/admin/audit-logs', label: 'System Audit Logs', icon: ShieldAlert },
   ];
 
-  const links = isAdmin ? adminLinks : isLibrarian ? librarianLinks : studentLinks;
-  const portalTitle = isAdmin ? 'Admin Portal' : isLibrarian ? 'Librarian Desk' : 'Student Portal';
+  const facultyLinks = [
+    { to: '/faculty/dashboard', label: 'Faculty Dashboard', icon: LayoutDashboard },
+    { to: '/faculty/books', label: 'Book Catalog Access', icon: BookOpen },
+    { to: '/faculty/issue', label: 'Issue / Approve Book', icon: ArrowRightLeft },
+    { to: '/faculty/requests', label: 'Book Requests', icon: Send },
+    { to: '/faculty/resources', label: 'Department Resources', icon: FolderOpen },
+  ];
+
+  const links = isAdmin ? adminLinks : isLibrarian ? librarianLinks : isFaculty ? facultyLinks : studentLinks;
+  const portalTitle = isAdmin ? 'Admin Portal' : isLibrarian ? 'Librarian Desk' : isFaculty ? 'Faculty Desk' : 'Student Portal';
 
   const sidebarContent = (
     <div className="flex flex-col h-full bg-white border-r border-slate-200">

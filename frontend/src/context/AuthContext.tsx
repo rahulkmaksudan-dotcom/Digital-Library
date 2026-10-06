@@ -10,6 +10,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isAdmin: boolean;
   isLibrarian: boolean;
+  isFaculty: boolean;
   isStaff: boolean;
   isStudent: boolean;
   login: (identifier: string, pass: string) => Promise<void>;
@@ -92,7 +93,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isAuthenticated = !!token && !!user;
   const isAdmin = role === 'ADMIN';
   const isLibrarian = role === 'LIBRARIAN';
-  const isStaff = isAdmin || isLibrarian;
+  const isFaculty = role === 'FACULTY';
+  const isStaff = isAdmin || isLibrarian || isFaculty;
   const isStudent = role === 'STUDENT';
 
   return (
@@ -104,6 +106,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAuthenticated,
         isAdmin,
         isLibrarian,
+        isFaculty,
         isStaff,
         isStudent,
         login,

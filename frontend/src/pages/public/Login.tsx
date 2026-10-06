@@ -7,7 +7,7 @@ export const Login: React.FC = () => {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login, isAdmin, isLibrarian } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -23,6 +23,8 @@ export const Login: React.FC = () => {
         navigate('/admin/dashboard');
       } else if (savedUser.role === 'LIBRARIAN') {
         navigate('/librarian/dashboard');
+      } else if (savedUser.role === 'FACULTY') {
+        navigate('/faculty/dashboard');
       } else {
         navigate('/student/dashboard');
       }

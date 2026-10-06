@@ -18,7 +18,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
 
 export const Navbar: React.FC = () => {
-  const { user, isAuthenticated, isAdmin, isLibrarian, isStudent, logout } = useAuth();
+  const { user, isAuthenticated, isAdmin, isLibrarian, isFaculty, isStudent, logout } = useAuth();
   const { unreadCount, recentNotifications, markAsRead, markAllAsRead } = useNotification();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
@@ -51,6 +51,7 @@ export const Navbar: React.FC = () => {
   const getDashboardLink = () => {
     if (isAdmin) return '/admin/dashboard';
     if (isLibrarian) return '/librarian/dashboard';
+    if (isFaculty) return '/faculty/dashboard';
     return '/student/dashboard';
   };
 

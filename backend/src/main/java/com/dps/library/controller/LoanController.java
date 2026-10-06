@@ -22,8 +22,8 @@ public class LoanController {
     private LoanService loanService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
-    @Operation(summary = "Search Loans (Staff)", description = "Staff can filter all book loans across the college")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN', 'FACULTY')")
+    @Operation(summary = "Search Loans (Staff)", description = "Authorized staff and faculty can review all loan records across the college")
     public ResponseEntity<ApiResponse<PagedResponse<LoanDto>>> searchLoans(
             @RequestParam(required = false) String status,
             @RequestParam(required = false) Long userId,
@@ -67,8 +67,8 @@ public class LoanController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
-    @Operation(summary = "Issue Book", description = "Staff issues a book to a student with 10-day period")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN', 'FACULTY')")
+    @Operation(summary = "Issue Book", description = "Authorized staff and faculty can issue a book to a student with the configured lending period")
     public ResponseEntity<ApiResponse<LoanDto>> issueBook(
             @Valid @RequestBody IssueBookRequest request,
             @AuthenticationPrincipal UserPrincipal currentUser) {
@@ -78,8 +78,8 @@ public class LoanController {
     }
 
     @PostMapping("/{id}/return")
-    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
-    @Operation(summary = "Return Book", description = "Staff records book deposit, recalculates fines and releases reservations")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN', 'FACULTY')")
+    @Operation(summary = "Return Book", description = "Authorized staff and faculty record the return, calculate fines, and release reservations")
     public ResponseEntity<ApiResponse<LoanDto>> returnBook(
             @PathVariable Long id,
             @RequestBody(required = false) ReturnBookRequest request,

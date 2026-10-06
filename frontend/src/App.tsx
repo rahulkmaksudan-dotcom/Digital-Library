@@ -44,6 +44,9 @@ import { LibrarianRequests } from './pages/librarian/LibrarianRequests';
 import { LibrarianApprovals } from './pages/librarian/LibrarianApprovals';
 import { LibrarianReports } from './pages/librarian/LibrarianReports';
 
+// Faculty Portal Pages
+import { FacultyDashboard } from './pages/faculty/FacultyDashboard';
+
 // Admin Portal Pages
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { AdminUsers } from './pages/admin/AdminUsers';
@@ -106,6 +109,16 @@ export const App: React.FC = () => {
                 <Route path="requests" element={<LibrarianRequests />} />
                 <Route path="resource-approvals" element={<LibrarianApprovals />} />
                 <Route path="reports" element={<LibrarianReports />} />
+              </Route>
+
+              {/* Faculty Portal Routes */}
+              <Route path="/faculty" element={<DashboardLayout requiredRole="FACULTY" />}>
+                <Route index element={<Navigate to="/faculty/dashboard" replace />} />
+                <Route path="dashboard" element={<FacultyDashboard />} />
+                <Route path="books" element={<LibrarianBooks />} />
+                <Route path="issue" element={<LibrarianIssue />} />
+                <Route path="requests" element={<LibrarianRequests />} />
+                <Route path="resources" element={<LibrarianApprovals />} />
               </Route>
 
               {/* Admin Portal Routes */}

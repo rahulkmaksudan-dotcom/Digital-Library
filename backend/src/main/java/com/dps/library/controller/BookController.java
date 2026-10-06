@@ -63,8 +63,8 @@ public class BookController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
-    @Operation(summary = "Add New Book", description = "Librarian or Admin adds a new title to the inventory")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN', 'FACULTY')")
+    @Operation(summary = "Add New Book", description = "Admin, librarian, or faculty member adds a new title to the digital catalog")
     public ResponseEntity<ApiResponse<BookDto>> createBook(
             @Valid @RequestBody BookDto dto,
             @AuthenticationPrincipal UserPrincipal currentUser) {
@@ -74,7 +74,7 @@ public class BookController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN', 'FACULTY')")
     @Operation(summary = "Update Book", description = "Modify book metadata, copies, or status")
     public ResponseEntity<ApiResponse<BookDto>> updateBook(
             @PathVariable Long id,
@@ -86,8 +86,8 @@ public class BookController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Delete Book", description = "Remove book from catalog (only if no active loans)")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN', 'FACULTY')")
+    @Operation(summary = "Delete Book", description = "Remove book from the catalog when authorized staff or faculty confirm the action")
     public ResponseEntity<ApiResponse<Void>> deleteBook(
             @PathVariable Long id,
             @AuthenticationPrincipal UserPrincipal currentUser) {

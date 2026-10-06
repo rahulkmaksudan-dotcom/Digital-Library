@@ -7,11 +7,11 @@ import { useAuth } from '../context/AuthContext';
 import { Menu } from 'lucide-react';
 
 interface DashboardLayoutProps {
-  requiredRole?: 'ADMIN' | 'LIBRARIAN' | 'STAFF' | 'STUDENT';
+  requiredRole?: 'ADMIN' | 'LIBRARIAN' | 'FACULTY' | 'STAFF' | 'STUDENT';
 }
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ requiredRole }) => {
-  const { user, isAuthenticated, loading, isAdmin, isLibrarian, isStaff, isStudent } = useAuth();
+  const { user, isAuthenticated, loading, isAdmin, isLibrarian, isFaculty, isStaff, isStudent } = useAuth();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   if (loading) {
@@ -31,6 +31,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ requiredRole }
     return <Navigate to="/" replace />;
   }
   if (requiredRole === 'LIBRARIAN' && !isStaff) {
+    return <Navigate to="/" replace />;
+  }
+  if (requiredRole === 'FACULTY' && !isFaculty) {
     return <Navigate to="/" replace />;
   }
   if (requiredRole === 'STAFF' && !isStaff) {

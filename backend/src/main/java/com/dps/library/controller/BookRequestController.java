@@ -26,7 +26,7 @@ public class BookRequestController {
     private BookRequestService bookRequestService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN', 'FACULTY')")
     @Operation(summary = "Search Book Requests (Staff)")
     public ResponseEntity<ApiResponse<PagedResponse<BookRequestDto>>> searchRequests(
             @RequestParam(required = false) String status,
@@ -61,7 +61,7 @@ public class BookRequestController {
     }
 
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN', 'FACULTY')")
     @Operation(summary = "Update Request Status (Staff)")
     public ResponseEntity<ApiResponse<BookRequestDto>> updateStatus(
             @PathVariable Long id,

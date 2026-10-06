@@ -1,0 +1,18 @@
+-- ==============================================================================
+-- V7__seed_demo_department_books.sql
+-- Extra demo inventory to ensure every department has at least 2-3 books available
+-- for review and verification in the admin/faculty/librarian workflows.
+-- ==============================================================================
+
+INSERT INTO books (
+    id, isbn, title, subtitle, author_id, author_name, category_id, category_name,
+    publisher, publication_year, edition, language, description, cover_image,
+    total_copies, available_copies, location, shelf_number, book_type, digital_available,
+    digital_file, status
+) VALUES
+(36, '978-9352600081', 'Management Essentials', 'Principles of Leadership, Planning, and Operations', 8, 'Ian Sommerville', 9, 'Management & Humanities', 'Pearson', 2021, '3rd Edition', 'English', 'A practical introduction to management principles, organizational behavior, and operational planning for technical students.', 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=500&q=80', 8, 7, 'Humanities Block', 'MGMT-C-104', 'BOTH', TRUE, '/api/v1/resources/download/sample-management.pdf', 'AVAILABLE'),
+(37, '978-8126554821', 'Engineering Economics and Cost Analysis', 'Decision-Making for Technical Projects', 8, 'Ian Sommerville', 9, 'Management & Humanities', 'McGraw-Hill', 2019, '2nd Edition', 'English', 'Covers cost analysis, budgeting, depreciation, break-even studies, and project feasibility for engineering professionals.', 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=500&q=80', 7, 5, 'Humanities Block', 'MGMT-D-110', 'PHYSICAL', FALSE, NULL, 'AVAILABLE'),
+(38, '978-9385968261', 'Professional Ethics for Engineers', 'Responsible Design, Safety, and Social Impact', 8, 'Ian Sommerville', 9, 'Management & Humanities', 'Oxford', 2022, '1st Edition', 'English', 'Introduces ethical reasoning, risk assessment, and professional responsibility in engineering and technology practice.', 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=500&q=80', 6, 4, 'Humanities Block', 'MGMT-E-118', 'BOTH', TRUE, '/api/v1/resources/download/sample-ethics-mgmt.pdf', 'AVAILABLE'),
+(39, '978-9352132917', 'Data Visualization with Python', 'Storytelling through Charts, Dashboards, and Insights', 10, 'Herbert Schildt', 10, 'Data Science & Analytics', 'Packt', 2020, '2nd Edition', 'English', 'Hands-on guide for building dashboards and communicating measurable insights through modern data storytelling techniques.', 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500&q=80', 9, 8, 'Data Science Wing', 'DATA-C-312', 'BOTH', TRUE, '/api/v1/resources/download/sample-data-visualization.pdf', 'AVAILABLE'),
+(40, '978-9355510832', 'Machine Learning for Beginners', 'A Practical Overview of Models and Predictions', 10, 'Herbert Schildt', 10, 'Data Science & Analytics', 'Wiley', 2023, '1st Edition', 'English', 'Introduces classification, regression, clustering, and model evaluation with real-world examples for learners and practitioners.', 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=500&q=80', 10, 9, 'Data Science Wing', 'DATA-D-318', 'BOTH', TRUE, '/api/v1/resources/download/sample-ml-beginners.pdf', 'AVAILABLE'),
+(41, '978-9389347807', 'Statistics for Engineers and Scientists', 'Probability, Inference, and Decision Tools', 5, 'Abraham Silberschatz', 10, 'Data Science & Analytics', 'Springer', 2021, '4th Edition', 'English', 'Covers probability, sampling, hypothesis testing, regression, and inference for advanced engineering research and analysis.', 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500&q=80', 8, 6, 'Data Science Wing', 'DATA-E-322', 'PHYSICAL', FALSE, NULL, 'AVAILABLE');
