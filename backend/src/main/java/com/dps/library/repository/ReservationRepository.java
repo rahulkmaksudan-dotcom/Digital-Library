@@ -28,11 +28,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("SELECT r FROM Reservation r WHERE " +
            "(:status IS NULL OR r.status = :status) AND " +
            "(:userId IS NULL OR r.user.id = :userId) AND " +
-           "(:query IS NULL OR LOWER(r.book.title) LIKE LOWER(CONCAT('%', :query, '%')) " +
-           "OR LOWER(r.user.fullName) LIKE LOWER(CONCAT('%', :query, '%')))")
+           "(:queryPattern IS NULL OR " +
+           "LOWER(r.book.title) LIKE :queryPattern OR " +
+           "LOWER(r.user.fullName) LIKE :queryPattern)")
     Page<Reservation> searchReservations(@Param("status") String status,
                                          @Param("userId") Long userId,
-                                         @Param("query") String query,
+                                         @Param("queryPattern") String queryPattern,
                                          Pageable pageable);
 }
 

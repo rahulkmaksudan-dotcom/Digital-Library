@@ -37,10 +37,13 @@ public class UserService {
 
     public PagedResponse<UserDto> searchUsers(String roleName, String department, String query, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        String queryPattern = (query != null && !query.trim().isEmpty())
+            ? "%" + query.trim().toLowerCase() + "%"
+            : null;
         Page<User> userPage = userRepository.searchUsers(
             (roleName != null && !roleName.isEmpty()) ? roleName : null,
             (department != null && !department.isEmpty()) ? department : null,
-            (query != null && !query.isEmpty()) ? query : null,
+            queryPattern,
             pageable
         );
 

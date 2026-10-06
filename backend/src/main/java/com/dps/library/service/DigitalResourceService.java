@@ -44,14 +44,20 @@ public class DigitalResourceService {
                                                              String subject, String resourceType, String category,
                                                              String query, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        String subjectPattern = (subject != null && !subject.trim().isEmpty())
+            ? "%" + subject.trim().toLowerCase() + "%"
+            : null;
+        String queryPattern = (query != null && !query.trim().isEmpty())
+            ? "%" + query.trim().toLowerCase() + "%"
+            : null;
         Page<DigitalResource> resourcePage = resourceRepository.searchResources(
             (status != null && !status.isEmpty()) ? status : null,
             (department != null && !department.isEmpty()) ? department : null,
             semester,
-            (subject != null && !subject.isEmpty()) ? subject : null,
+            subjectPattern,
             (resourceType != null && !resourceType.isEmpty()) ? resourceType : null,
             (category != null && !category.isEmpty()) ? category : null,
-            (query != null && !query.isEmpty()) ? query : null,
+            queryPattern,
             pageable
         );
 

@@ -20,19 +20,19 @@ public interface DigitalResourceRepository extends JpaRepository<DigitalResource
            "(:status IS NULL OR r.status = :status) AND " +
            "(:department IS NULL OR r.department = :department) AND " +
            "(:semester IS NULL OR r.semester = :semester) AND " +
-           "(:subject IS NULL OR LOWER(r.subject) LIKE LOWER(CONCAT('%', :subject, '%'))) AND " +
+           "(:subjectPattern IS NULL OR LOWER(r.subject) LIKE :subjectPattern) AND " +
            "(:resourceType IS NULL OR r.resourceType = :resourceType) AND " +
            "(:category IS NULL OR r.category = :category) AND " +
-           "(:query IS NULL OR LOWER(r.title) LIKE LOWER(CONCAT('%', :query, '%')) " +
-           "OR LOWER(r.description) LIKE LOWER(CONCAT('%', :query, '%')) " +
-           "OR LOWER(r.subject) LIKE LOWER(CONCAT('%', :query, '%')))")
+           "(:queryPattern IS NULL OR LOWER(r.title) LIKE :queryPattern " +
+           "OR LOWER(r.description) LIKE :queryPattern " +
+           "OR LOWER(r.subject) LIKE :queryPattern)")
     Page<DigitalResource> searchResources(@Param("status") String status,
                                           @Param("department") String department,
                                           @Param("semester") Integer semester,
-                                          @Param("subject") String subject,
+                                          @Param("subjectPattern") String subjectPattern,
                                           @Param("resourceType") String resourceType,
                                           @Param("category") String category,
-                                          @Param("query") String query,
+                                          @Param("queryPattern") String queryPattern,
                                           Pageable pageable);
 
     @Query("SELECT DISTINCT r.department FROM DigitalResource r WHERE r.department IS NOT NULL")

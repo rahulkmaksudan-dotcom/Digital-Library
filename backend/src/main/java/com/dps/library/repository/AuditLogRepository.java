@@ -18,11 +18,12 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
     @Query("SELECT a FROM AuditLog a WHERE " +
            "(:action IS NULL OR a.action = :action) AND " +
            "(:entity IS NULL OR a.entity = :entity) AND " +
-           "(:query IS NULL OR LOWER(a.description) LIKE LOWER(CONCAT('%', :query, '%')) " +
-           "OR LOWER(a.userEmail) LIKE LOWER(CONCAT('%', :query, '%')))")
+           "(:queryPattern IS NULL OR " +
+           "LOWER(a.description) LIKE :queryPattern OR " +
+           "LOWER(a.userEmail) LIKE :queryPattern)")
     Page<AuditLog> searchLogs(@Param("action") String action,
                               @Param("entity") String entity,
-                              @Param("query") String query,
+                              @Param("queryPattern") String queryPattern,
                               Pageable pageable);
 }
 

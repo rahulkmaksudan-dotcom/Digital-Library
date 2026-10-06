@@ -22,7 +22,8 @@ import {
   Globe,
   Hash,
   ShieldCheck,
-  Clock
+  Clock,
+  Trash2
 } from 'lucide-react';
 import { LoadingSpinner } from '../../components/LoadingSpinner';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
@@ -35,10 +36,13 @@ export const BookDetails: React.FC = () => {
   const [reserving, setReserving] = useState(false);
   const [borrowModalOpen, setBorrowModalOpen] = useState(false);
   const [borrowing, setBorrowing] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-  const { user, isAuthenticated, isStudent, isStaff } = useAuth();
+  const { user, isAuthenticated, isStudent, isStaff, isAdmin, isLibrarian, isFaculty } = useAuth();
   const { success, error, info } = useToast();
   const navigate = useNavigate();
+  const canManage = isAdmin || isLibrarian || isFaculty;
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -119,6 +123,21 @@ export const BookDetails: React.FC = () => {
       error(err.message || 'Failed to borrow book');
     } finally {
       setBorrowing(false);
+    }
+  };
+
+  const handleDeleteBook = async () => {
+    if (!book) return;
+    setDeleting(true);
+    try {
+      await bookService.deleteBook(book.id);
+      success(`"${book.title}" was removed from the library catalog.`);
+      navigate('/books');
+    } catch (err: any) {
+      error(err.message || 'Failed to delete book');
+    } finally {
+      setDeleting(false);
+      setDeleteModalOpen(false);
     }
   };
 
@@ -231,6 +250,36 @@ export const BookDetails: React.FC = () => {
                 <Bookmark className={`w-4 h-4 ${isFavorite ? 'fill-current text-rose-500' : ''}`} />
                 <span>{isFavorite ? 'Saved in Wishlist' : 'Add to Wishlist'}</span>
               </button>
+
+              {/* Staff and Faculty Access Controls */}
+              {canManage && (
+                <div className="pt-3 border-t border-slate-200 space-y-2">
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center">
+                    Staff & Faculty Controls
+                  </div>
+                  <Link
+                    to={isAdmin ? '/admin/loans' : isLibrarian ? '/librarian/issue' : '/faculty/issue'}
+                    className="w-full py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5"
+                  >
+                    <BookOpen className="w-3.5 h-3.5 text-blue-600" />
+                    <span>Issue Book to Patron</span>
+                  </Link>
+                  <Link
+                    to={isAdmin ? '/admin/books' : isLibrarian ? '/librarian/books' : '/faculty/books'}
+                    className="w-full py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5"
+                  >
+                    <Layers className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Edit in Inventory</span>
+                  </Link>
+                  <button
+                    onClick={() => setDeleteModalOpen(true)}
+                    className="w-full py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                    <span>Delete Book from Catalog</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -365,6 +414,18 @@ export const BookDetails: React.FC = () => {
         message={`Are you sure you want to borrow "${book.title}"? The book will be issued to your account for 10 days starting today.`}
         confirmLabel="Confirm Loan"
         loading={borrowing}
+      />
+
+      {/* Delete Book Confirmation Modal for Staff */}
+      <ConfirmDialog
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={handleDeleteBook}
+        title="Delete Book from Catalog"
+        message={`Are you sure you want to permanently delete "${book.title}" from the library catalog? This action cannot be undone.`}
+        confirmLabel="Delete Book"
+        isDestructive={true}
+        loading={deleting}
       />
     </div>
   );

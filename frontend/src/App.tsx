@@ -68,9 +68,11 @@ export const App: React.FC = () => {
               <Route element={<PublicLayout />}>
                 <Route path="/" element={<Home />} />
                 <Route path="/catalog" element={<BooksCatalog />} />
-                <Route path="/books" element={<Navigate to="/catalog" replace />} />
+                <Route path="/books" element={<BooksCatalog />} />
                 <Route path="/books/:id" element={<BookDetails />} />
                 <Route path="/resources" element={<DigitalResourcesPage />} />
+                <Route path="/digital-resources" element={<DigitalResourcesPage />} />
+                <Route path="/academic" element={<DigitalResourcesPage />} />
                 <Route path="/categories" element={<CategoriesPage />} />
                 <Route path="/authors" element={<AuthorsPage />} />
                 <Route path="/about" element={<About />} />

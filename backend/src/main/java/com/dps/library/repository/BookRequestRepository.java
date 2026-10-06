@@ -17,12 +17,13 @@ public interface BookRequestRepository extends JpaRepository<BookRequest, Long> 
     @Query("SELECT r FROM BookRequest r WHERE " +
            "(:status IS NULL OR r.status = :status) AND " +
            "(:userId IS NULL OR r.user.id = :userId) AND " +
-           "(:query IS NULL OR LOWER(r.title) LIKE LOWER(CONCAT('%', :query, '%')) " +
-           "OR LOWER(r.author) LIKE LOWER(CONCAT('%', :query, '%')) " +
-           "OR LOWER(r.user.fullName) LIKE LOWER(CONCAT('%', :query, '%')))")
+           "(:queryPattern IS NULL OR " +
+           "LOWER(r.title) LIKE :queryPattern OR " +
+           "LOWER(r.author) LIKE :queryPattern OR " +
+           "LOWER(r.user.fullName) LIKE :queryPattern)")
     Page<BookRequest> searchRequests(@Param("status") String status,
                                      @Param("userId") Long userId,
-                                     @Param("query") String query,
+                                     @Param("queryPattern") String queryPattern,
                                      Pageable pageable);
 }
 

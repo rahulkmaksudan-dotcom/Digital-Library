@@ -27,20 +27,21 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     List<Book> findTop6ByOrderByCreatedAtDesc();
 
-    @Query("SELECT b FROM Book b WHERE " +
-           "(:query IS NULL OR LOWER(b.title) LIKE LOWER(CONCAT('%', :query, '%')) " +
-           "OR LOWER(b.authorName) LIKE LOWER(CONCAT('%', :query, '%')) " +
-           "OR LOWER(b.isbn) LIKE LOWER(CONCAT('%', :query, '%')) " +
-           "OR LOWER(b.publisher) LIKE LOWER(CONCAT('%', :query, '%')) " +
-           "OR LOWER(b.description) LIKE LOWER(CONCAT('%', :query, '%'))) AND " +
-           "(:categoryId IS NULL OR b.category.id = :categoryId) AND " +
-           "(:authorId IS NULL OR b.author.id = :authorId) AND " +
+    @Query("SELECT b FROM Book b LEFT JOIN b.category c LEFT JOIN b.author a WHERE " +
+           "(:queryPattern IS NULL OR " +
+           "LOWER(b.title) LIKE :queryPattern OR " +
+           "LOWER(b.authorName) LIKE :queryPattern OR " +
+           "LOWER(b.isbn) LIKE :queryPattern OR " +
+           "LOWER(b.publisher) LIKE :queryPattern OR " +
+           "LOWER(b.description) LIKE :queryPattern) AND " +
+           "(:categoryId IS NULL OR c.id = :categoryId) AND " +
+           "(:authorId IS NULL OR a.id = :authorId) AND " +
            "(:language IS NULL OR b.language = :language) AND " +
            "(:bookType IS NULL OR b.bookType = :bookType) AND " +
            "(:status IS NULL OR b.status = :status) AND " +
            "(:digitalOnly IS NULL OR b.digitalAvailable = :digitalOnly) AND " +
-           "(:availableOnly IS NULL OR (:availableOnly = true AND b.availableCopies > 0) OR (:availableOnly = false))")
-    Page<Book> searchBooks(@Param("query") String query,
+           "(:availableOnly IS NULL OR :availableOnly = false OR b.availableCopies > 0)")
+    Page<Book> searchBooks(@Param("queryPattern") String queryPattern,
                            @Param("categoryId") Long categoryId,
                            @Param("authorId") Long authorId,
                            @Param("language") String language,
@@ -53,4 +54,3 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     @Query("SELECT b.categoryName, COUNT(b) FROM Book b GROUP BY b.categoryName")
     List<Object[]> countBooksByCategory();
 }
-

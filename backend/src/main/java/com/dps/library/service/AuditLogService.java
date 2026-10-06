@@ -28,10 +28,13 @@ public class AuditLogService {
 
     public PagedResponse<AuditLog> getAuditLogs(String action, String entity, String query, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        String queryPattern = (query != null && !query.trim().isEmpty())
+            ? "%" + query.trim().toLowerCase() + "%"
+            : null;
         Page<AuditLog> logPage = auditLogRepository.searchLogs(
             (action != null && !action.isEmpty()) ? action : null,
             (entity != null && !entity.isEmpty()) ? entity : null,
-            (query != null && !query.isEmpty()) ? query : null,
+            queryPattern,
             pageable
         );
 

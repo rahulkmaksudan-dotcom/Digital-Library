@@ -31,12 +31,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE " +
            "(:roleName IS NULL OR u.role.name = :roleName) AND " +
            "(:department IS NULL OR u.department = :department) AND " +
-           "(:query IS NULL OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :query, '%')) " +
-           "OR LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%')) " +
-           "OR LOWER(u.studentId) LIKE LOWER(CONCAT('%', :query, '%')))")
+           "(:queryPattern IS NULL OR " +
+           "LOWER(u.fullName) LIKE :queryPattern OR " +
+           "LOWER(u.email) LIKE :queryPattern OR " +
+           "LOWER(u.studentId) LIKE :queryPattern)")
     Page<User> searchUsers(@Param("roleName") String roleName,
                            @Param("department") String department,
-                           @Param("query") String query,
+                           @Param("queryPattern") String queryPattern,
                            Pageable pageable);
 }
 

@@ -74,10 +74,13 @@ public class BookRequestService {
 
     public PagedResponse<BookRequestDto> searchRequests(String status, Long userId, String query, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        String queryPattern = (query != null && !query.trim().isEmpty())
+            ? "%" + query.trim().toLowerCase() + "%"
+            : null;
         Page<BookRequest> reqPage = bookRequestRepository.searchRequests(
             (status != null && !status.isEmpty()) ? status : null,
             userId,
-            (query != null && !query.isEmpty()) ? query : null,
+            queryPattern,
             pageable
         );
 

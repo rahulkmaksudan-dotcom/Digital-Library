@@ -195,11 +195,14 @@ public class LoanService {
 
     public PagedResponse<LoanDto> searchLoans(String status, Long userId, Long bookId, String query, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "issueDate"));
+        String queryPattern = (query != null && !query.trim().isEmpty())
+            ? "%" + query.trim().toLowerCase() + "%"
+            : null;
         Page<Loan> loanPage = loanRepository.searchLoans(
             (status != null && !status.isEmpty()) ? status : null,
             userId,
             bookId,
-            (query != null && !query.isEmpty()) ? query : null,
+            queryPattern,
             pageable
         );
 

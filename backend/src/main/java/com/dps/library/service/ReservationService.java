@@ -118,10 +118,13 @@ public class ReservationService {
 
     public PagedResponse<ReservationDto> searchReservations(String status, Long userId, String query, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "reservationDate"));
+        String queryPattern = (query != null && !query.trim().isEmpty())
+            ? "%" + query.trim().toLowerCase() + "%"
+            : null;
         Page<Reservation> resPage = reservationRepository.searchReservations(
             (status != null && !status.isEmpty()) ? status : null,
             userId,
-            (query != null && !query.isEmpty()) ? query : null,
+            queryPattern,
             pageable
         );
 

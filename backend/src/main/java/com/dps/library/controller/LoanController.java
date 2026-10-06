@@ -67,19 +67,30 @@ public class LoanController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN', 'FACULTY')")
-    @Operation(summary = "Issue Book", description = "Authorized staff and faculty can issue a book to a student with the configured lending period")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Issue or Borrow Book", description = "Staff and faculty can issue books to any student/faculty. Students can self-borrow books.")
     public ResponseEntity<ApiResponse<LoanDto>> issueBook(
             @Valid @RequestBody IssueBookRequest request,
             @AuthenticationPrincipal UserPrincipal currentUser) {
+
+        boolean isStaffOrFaculty = currentUser.getAuthorities().stream().anyMatch(a ->
+            a.getAuthority().equals("ROLE_ADMIN") ||
+            a.getAuthority().equals("ROLE_LIBRARIAN") ||
+            a.getAuthority().equals("ROLE_FACULTY")
+        );
+
+        if (!isStaffOrFaculty) {
+            // Students can only borrow books for themselves
+            request.setUserId(currentUser.getId());
+        }
 
         LoanDto loan = loanService.issueBook(request, currentUser.getId(), currentUser.getEmail());
         return new ResponseEntity<>(ApiResponse.success("Book issued successfully", loan), HttpStatus.CREATED);
     }
 
     @PostMapping("/{id}/return")
-    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN', 'FACULTY')")
-    @Operation(summary = "Return Book", description = "Authorized staff and faculty record the return, calculate fines, and release reservations")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Return Book", description = "Staff, faculty, and borrowers can return books and release reservations")
     public ResponseEntity<ApiResponse<LoanDto>> returnBook(
             @PathVariable Long id,
             @RequestBody(required = false) ReturnBookRequest request,

@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Search, Filter, SlidersHorizontal, BookOpen, RotateCcw } from 'lucide-react';
+import { useSearchParams, Link } from 'react-router-dom';
+import { Search, Filter, SlidersHorizontal, BookOpen, RotateCcw, Plus } from 'lucide-react';
 import { Book, Category } from '../../types';
 import { bookService, categoryService } from '../../api';
+import { useAuth } from '../../context/AuthContext';
 import { BookCard } from '../../components/BookCard';
 import { BookCardSkeleton } from '../../components/Skeleton';
 import { Pagination } from '../../components/Pagination';
@@ -86,15 +87,31 @@ export const BooksCatalog: React.FC = () => {
     setSearchParams(new URLSearchParams());
   };
 
+  const { isAdmin, isLibrarian, isFaculty } = useAuth();
+  const canManageBooks = isAdmin || isLibrarian || isFaculty;
+  const manageBooksPath = isAdmin ? '/admin/books' : isLibrarian ? '/librarian/books' : '/faculty/books';
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Page Header */}
       <div className="mb-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              Books Catalog & Literature
-            </h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                Books Catalog & Literature
+              </h1>
+              {canManageBooks && (
+                <Link
+                  to={manageBooksPath}
+                  className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-sm transition"
+                  title="Open library inventory to add, edit, or delete books"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>+ Add Book</span>
+                </Link>
+              )}
+            </div>
             <p className="text-xs sm:text-sm text-slate-500 mt-1">
               Search the complete holdings of Thakur Shree DPS College of Engineering Central Library.
             </p>

@@ -49,8 +49,12 @@ public class BookService {
         );
         Pageable pageable = PageRequest.of(page, size, sort);
 
+        String queryPattern = (query != null && !query.trim().isEmpty())
+            ? "%" + query.trim().toLowerCase() + "%"
+            : null;
+
         Page<Book> booksPage = bookRepository.searchBooks(
-            (query != null && !query.trim().isEmpty()) ? query.trim() : null,
+            queryPattern,
             categoryId,
             authorId,
             (language != null && !language.trim().isEmpty()) ? language.trim() : null,

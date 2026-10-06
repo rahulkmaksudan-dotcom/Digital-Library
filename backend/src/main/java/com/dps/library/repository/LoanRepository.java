@@ -34,13 +34,14 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
            "(:status IS NULL OR l.status = :status) AND " +
            "(:userId IS NULL OR l.user.id = :userId) AND " +
            "(:bookId IS NULL OR l.book.id = :bookId) AND " +
-           "(:query IS NULL OR LOWER(l.book.title) LIKE LOWER(CONCAT('%', :query, '%')) " +
-           "OR LOWER(l.user.fullName) LIKE LOWER(CONCAT('%', :query, '%')) " +
-           "OR LOWER(l.user.studentId) LIKE LOWER(CONCAT('%', :query, '%')))")
+           "(:queryPattern IS NULL OR " +
+           "LOWER(l.book.title) LIKE :queryPattern OR " +
+           "LOWER(l.user.fullName) LIKE :queryPattern OR " +
+           "LOWER(l.user.studentId) LIKE :queryPattern)")
     Page<Loan> searchLoans(@Param("status") String status,
                            @Param("userId") Long userId,
                            @Param("bookId") Long bookId,
-                           @Param("query") String query,
+                           @Param("queryPattern") String queryPattern,
                            Pageable pageable);
 
     @Query("SELECT l.book.id, l.book.title, COUNT(l) as cnt FROM Loan l GROUP BY l.book.id, l.book.title ORDER BY cnt DESC")

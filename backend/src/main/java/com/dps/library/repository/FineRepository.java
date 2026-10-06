@@ -31,12 +31,13 @@ public interface FineRepository extends JpaRepository<Fine, Long> {
     @Query("SELECT f FROM Fine f WHERE " +
            "(:status IS NULL OR f.status = :status) AND " +
            "(:userId IS NULL OR f.user.id = :userId) AND " +
-           "(:query IS NULL OR LOWER(f.user.fullName) LIKE LOWER(CONCAT('%', :query, '%')) " +
-           "OR LOWER(f.user.studentId) LIKE LOWER(CONCAT('%', :query, '%')) " +
-           "OR LOWER(f.loan.book.title) LIKE LOWER(CONCAT('%', :query, '%')))")
+           "(:queryPattern IS NULL OR " +
+           "LOWER(f.user.fullName) LIKE :queryPattern OR " +
+           "LOWER(f.user.studentId) LIKE :queryPattern OR " +
+           "LOWER(f.loan.book.title) LIKE :queryPattern)")
     Page<Fine> searchFines(@Param("status") String status,
                            @Param("userId") Long userId,
-                           @Param("query") String query,
+                           @Param("queryPattern") String queryPattern,
                            Pageable pageable);
 }
 
