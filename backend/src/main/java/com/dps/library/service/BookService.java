@@ -180,26 +180,30 @@ public class BookService {
     }
 
     private void mapFromDto(BookDto dto, Book book) {
-        book.setIsbn(dto.getIsbn().trim());
-        book.setTitle(dto.getTitle().trim());
+        book.setIsbn(dto.getIsbn() != null ? dto.getIsbn().trim() : null);
+        book.setTitle(dto.getTitle() != null ? dto.getTitle().trim() : null);
         book.setSubtitle(dto.getSubtitle());
-        book.setAuthorName(dto.getAuthorName().trim());
+
+        String authorName = dto.getAuthorName() != null ? dto.getAuthorName().trim() : null;
+        book.setAuthorName(authorName);
 
         if (dto.getAuthorId() != null) {
             authorRepository.findById(dto.getAuthorId()).ifPresent(book::setAuthor);
-        } else if (dto.getAuthorName() != null) {
-            Author author = authorRepository.findByName(dto.getAuthorName())
-                .orElseGet(() -> authorRepository.save(new Author(null, dto.getAuthorName(), "", "Unknown")));
+        } else if (authorName != null && !authorName.isEmpty()) {
+            Author author = authorRepository.findByNameIgnoreCase(authorName)
+                .orElseGet(() -> authorRepository.save(new Author(null, authorName, "", "Unknown")));
             book.setAuthor(author);
         }
 
+        String categoryName = dto.getCategoryName() != null ? dto.getCategoryName().trim() : null;
+
         if (dto.getCategoryId() != null) {
             categoryRepository.findById(dto.getCategoryId()).ifPresent(book::setCategory);
-        } else if (dto.getCategoryName() != null) {
-            categoryRepository.findByName(dto.getCategoryName()).ifPresent(book::setCategory);
+        } else if (categoryName != null && !categoryName.isEmpty()) {
+            categoryRepository.findByNameIgnoreCase(categoryName).ifPresent(book::setCategory);
         }
 
-        book.setCategoryName(dto.getCategoryName());
+        book.setCategoryName(categoryName);
         book.setPublisher(dto.getPublisher());
         book.setPublicationYear(dto.getPublicationYear());
         book.setEdition(dto.getEdition());
