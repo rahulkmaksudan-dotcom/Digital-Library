@@ -99,5 +99,75 @@ public class LoanController {
         LoanDto loan = loanService.returnBook(id, request, currentUser.getId(), currentUser.getEmail());
         return ResponseEntity.ok(ApiResponse.success("Book returned successfully", loan));
     }
+
+    @PostMapping("/request")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Request to Borrow Book", description = "Patrons and students submit a borrow request for librarian/faculty approval")
+    public ResponseEntity<ApiResponse<LoanDto>> requestLoan(
+            @Valid @RequestBody IssueBookRequest request,
+            @AuthenticationPrincipal UserPrincipal currentUser) {
+
+        request.setUserId(currentUser.getId());
+        LoanDto loan = loanService.requestLoan(request, currentUser.getId(), currentUser.getEmail());
+        return new ResponseEntity<>(ApiResponse.success("Borrow request submitted successfully. Awaiting approval.", loan), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/{id}/grant")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN', 'FACULTY')")
+    @Operation(summary = "Grant Loan Permission", description = "Admin, librarian, or faculty grants borrow request permission")
+    public ResponseEntity<ApiResponse<LoanDto>> grantLoan(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserPrincipal currentUser) {
+
+        LoanDto loan = loanService.grantLoan(id, currentUser.getId(), currentUser.getEmail());
+        return ResponseEntity.ok(ApiResponse.success("Loan permission granted and book issued successfully", loan));
+    }
+
+    @PostMapping("/{id}/revoke")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN', 'FACULTY')")
+    @Operation(summary = "Revoke Loan or Request", description = "Admin, librarian, or faculty revokes a pending borrow request or active loan")
+    public ResponseEntity<ApiResponse<LoanDto>> revokeLoan(
+            @PathVariable Long id,
+            @RequestBody(required = false) java.util.Map<String, String> body,
+            @AuthenticationPrincipal UserPrincipal currentUser) {
+
+        String reason = (body != null) ? body.get("reason") : null;
+        LoanDto loan = loanService.revokeLoan(id, reason, currentUser.getId(), currentUser.getEmail());
+        return ResponseEntity.ok(ApiResponse.success("Loan revoked successfully", loan));
+    }
+
+    @GetMapping("/pending")
+    @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN', 'FACULTY')")
+    @Operation(summary = "Get Pending Borrow Requests", description = "Staff/Faculty review all pending book borrow requests with book and student details")
+    public ResponseEntity<ApiResponse<PagedResponse<LoanDto>>> getPendingRequests(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+
+        PagedResponse<LoanDto> result = loanService.getPendingRequests(page, size);
+        return ResponseEntity.ok(ApiResponse.success("Pending borrow requests retrieved", result));
+    }
+
+    @GetMapping("/my-pending")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Get Current User's Pending Borrow Requests")
+    public ResponseEntity<ApiResponse<PagedResponse<LoanDto>>> getMyPendingRequests(
+            @AuthenticationPrincipal UserPrincipal currentUser,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        PagedResponse<LoanDto> result = loanService.getUserPendingRequests(currentUser.getId(), page, size);
+        return ResponseEntity.ok(ApiResponse.success("My pending requests retrieved", result));
+    }
+
+    @GetMapping("/check-book/{bookId}")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Check current user loan status for a book")
+    public ResponseEntity<ApiResponse<LoanDto>> checkUserBookStatus(
+            @PathVariable Long bookId,
+            @AuthenticationPrincipal UserPrincipal currentUser) {
+
+        LoanDto status = loanService.checkUserBookLoanStatus(currentUser.getId(), bookId);
+        return ResponseEntity.ok(ApiResponse.success("Book loan status retrieved", status));
+    }
 }
 

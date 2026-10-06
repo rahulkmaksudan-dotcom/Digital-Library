@@ -194,6 +194,44 @@ export const loanService = {
     const res = await apiClient.post<ApiResponse<Loan>>(`/loans/${id}/return`, data);
     return res.data.data;
   },
+
+  requestLoan: async (data: {
+    bookId: number;
+    loanDays?: number;
+    notes?: string;
+  }): Promise<Loan> => {
+    const res = await apiClient.post<ApiResponse<Loan>>('/loans/request', data);
+    return res.data.data;
+  },
+
+  grantLoan: async (id: number): Promise<Loan> => {
+    const res = await apiClient.post<ApiResponse<Loan>>(`/loans/${id}/grant`);
+    return res.data.data;
+  },
+
+  revokeLoan: async (id: number, reason?: string): Promise<Loan> => {
+    const res = await apiClient.post<ApiResponse<Loan>>(`/loans/${id}/revoke`, { reason });
+    return res.data.data;
+  },
+
+  getPendingRequests: async (page = 0, size = 20): Promise<PagedResponse<Loan>> => {
+    const res = await apiClient.get<ApiResponse<PagedResponse<Loan>>>('/loans/pending', {
+      params: { page, size },
+    });
+    return res.data.data;
+  },
+
+  getMyPendingRequests: async (page = 0, size = 10): Promise<PagedResponse<Loan>> => {
+    const res = await apiClient.get<ApiResponse<PagedResponse<Loan>>>('/loans/my-pending', {
+      params: { page, size },
+    });
+    return res.data.data;
+  },
+
+  checkBookStatus: async (bookId: number): Promise<Loan | null> => {
+    const res = await apiClient.get<ApiResponse<Loan | null>>(`/loans/check-book/${bookId}`);
+    return res.data.data;
+  },
 };
 
 export const fineService = {

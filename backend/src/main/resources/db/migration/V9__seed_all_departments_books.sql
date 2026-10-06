@@ -20,3 +20,4 @@ INSERT INTO books (
 (49, '978-9353163198', 'Manufacturing Technology: Metal Cutting and Machine Tools', 'Machining Processes, CNC Programming, and Tool Wear', 10, 'Herbert Schildt', 5, 'Mechanical Engineering', 'McGraw-Hill', 2021, '4th Edition', 'English', 'Covers cutting tool geometry, lathe operations, milling machines, grinding technology, and computer-integrated manufacturing fundamentals.', 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=500&q=80', 9, 7, 'Mechanical Dept Wing', 'ME-D-220', 'BOTH', TRUE, '/api/v1/resources/download/sample-manufacturing.pdf', 'AVAILABLE');
 
 ALTER TABLE books ALTER COLUMN id RESTART WITH 150;
+

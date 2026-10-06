@@ -39,6 +39,8 @@ export const BookDetails: React.FC = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  const [userLoan, setUserLoan] = useState<any | null>(null);
+
   const { user, isAuthenticated, isStudent, isStaff, isAdmin, isLibrarian, isFaculty } = useAuth();
   const { success, error, info } = useToast();
   const navigate = useNavigate();
@@ -54,6 +56,9 @@ export const BookDetails: React.FC = () => {
         if (isAuthenticated && user) {
           const favStatus = await favoriteService.checkFavorite(Number(id)).catch(() => false);
           setIsFavorite(favStatus);
+
+          const loanStatus = await loanService.checkBookStatus(Number(id)).catch(() => null);
+          setUserLoan(loanStatus);
         }
       } catch (err) {
         console.error('Error fetching book details:', err);
@@ -104,23 +109,23 @@ export const BookDetails: React.FC = () => {
     }
   };
 
-  const handleSelfIssue = async () => {
+  const handleRequestBorrow = async () => {
     if (!isAuthenticated || !user || !book) return;
 
     setBorrowing(true);
     try {
-      await loanService.issueBook({
-        userId: user.id,
+      const loan = await loanService.requestLoan({
         bookId: book.id,
-        notes: 'Issued via student portal checkout',
+        loanDays: 10,
+        notes: 'Borrow request submitted via catalog',
       });
-      success(`"${book.title}" borrowed successfully! Return within 10 days.`);
+      setUserLoan(loan);
+      success(`Borrow request for "${book.title}" submitted! The Library Committee / Librarian will review and grant permission.`);
       setBorrowModalOpen(false);
-      // Reload book details to reflect updated copy count
       const updated = await bookService.getBookById(book.id);
       setBook(updated);
     } catch (err: any) {
-      error(err.message || 'Failed to borrow book');
+      error(err.response?.data?.message || err.message || 'Failed to submit borrow request');
     } finally {
       setBorrowing(false);
     }
@@ -202,7 +207,17 @@ export const BookDetails: React.FC = () => {
 
             {/* Quick Action Buttons on Mobile & Desktop */}
             <div className="w-full max-w-[280px] mt-6 space-y-2.5">
-              {isAvailable ? (
+              {userLoan?.status === 'PENDING' ? (
+                <div className="w-full py-3 bg-amber-50 text-amber-800 border border-amber-200 rounded-xl text-xs font-bold tracking-wide flex items-center justify-center gap-2">
+                  <Clock className="w-4 h-4 text-amber-600" />
+                  <span>Borrow Request Pending Approval</span>
+                </div>
+              ) : userLoan?.status === 'ACTIVE' ? (
+                <div className="w-full py-3 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold tracking-wide flex items-center justify-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <span>Currently Borrowed (Due: {new Date(userLoan.dueDate).toLocaleDateString()})</span>
+                </div>
+              ) : isAvailable ? (
                 <button
                   onClick={() => {
                     if (!isAuthenticated) {
@@ -214,7 +229,7 @@ export const BookDetails: React.FC = () => {
                   className="w-full py-3 bg-dps-600 hover:bg-dps-700 text-white rounded-xl text-xs font-bold uppercase tracking-wide shadow-md shadow-dps-600/30 transition flex items-center justify-center gap-2"
                 >
                   <BookOpen className="w-4 h-4" />
-                  <span>Borrow Book (10 Days)</span>
+                  <span>Request to Borrow (10 Days)</span>
                 </button>
               ) : (
                 <button
@@ -409,10 +424,10 @@ export const BookDetails: React.FC = () => {
       <ConfirmDialog
         isOpen={borrowModalOpen}
         onClose={() => setBorrowModalOpen(false)}
-        onConfirm={handleSelfIssue}
-        title="Confirm Book Borrowing"
-        message={`Are you sure you want to borrow "${book.title}"? The book will be issued to your account for 10 days starting today.`}
-        confirmLabel="Confirm Loan"
+        onConfirm={handleRequestBorrow}
+        title="Request to Borrow Book"
+        message={`Submit a borrow request for "${book.title}"? The college library committee (Admin, Librarian, or Faculty) will review availability and grant permission for your 10-day loan.`}
+        confirmLabel="Submit Borrow Request"
         loading={borrowing}
       />
 

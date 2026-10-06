@@ -20,9 +20,12 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
     long countByUserIdAndStatus(Long userId, String status);
 
     Page<Loan> findByStatus(String status, Pageable pageable);
+    Page<Loan> findByStatusOrderByCreatedAtDesc(String status, Pageable pageable);
     long countByStatus(String status);
 
     Optional<Loan> findFirstByBookIdAndUserIdAndStatus(Long bookId, Long userId, String status);
+    Optional<Loan> findFirstByBookIdAndUserIdAndStatusIn(Long bookId, Long userId, java.util.Collection<String> statuses);
+    Page<Loan> findByUserIdAndStatusOrderByCreatedAtDesc(Long userId, String status, Pageable pageable);
 
     List<Loan> findByStatusAndDueDateBefore(String status, LocalDate date);
 

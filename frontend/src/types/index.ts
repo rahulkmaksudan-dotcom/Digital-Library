@@ -104,6 +104,8 @@ export interface Loan {
   userName?: string;
   userEmail?: string;
   studentId?: string;
+  userDepartment?: string;
+  userPhone?: string;
   user?: User;
   bookId?: number;
   bookTitle?: string;
@@ -111,10 +113,15 @@ export interface Loan {
   bookCover?: string;
   book?: Book;
   authorName?: string;
+  categoryName?: string;
+  shelfNumber?: string;
+  location?: string;
+  availableCopies?: number;
+  totalCopies?: number;
   issueDate: string;
   dueDate: string;
   returnDate?: string;
-  status: 'ACTIVE' | 'RETURNED' | 'OVERDUE' | 'LOST' | 'ISSUED' | string;
+  status: 'PENDING' | 'ACTIVE' | 'RETURNED' | 'OVERDUE' | 'REVOKED' | 'LOST' | 'ISSUED' | string;
   fineAmount?: number;
   daysOverdue?: number;
   issuedByName?: string;

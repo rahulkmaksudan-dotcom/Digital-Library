@@ -10,15 +10,22 @@ public class LoanDto {
     private String userName;
     private String userEmail;
     private String studentId;
+    private String userDepartment;
+    private String userPhone;
     private Long bookId;
     private String bookTitle;
     private String bookIsbn;
     private String bookCover;
     private String authorName;
+    private String categoryName;
+    private String shelfNumber;
+    private String location;
+    private Integer availableCopies;
+    private Integer totalCopies;
     private LocalDate issueDate;
     private LocalDate dueDate;
     private LocalDate returnDate;
-    private String status; // ACTIVE, RETURNED, OVERDUE, LOST
+    private String status; // PENDING, ACTIVE, RETURNED, OVERDUE, REVOKED, LOST
     private BigDecimal fineAmount;
     private Long daysOverdue;
     private String issuedByName;
@@ -43,6 +50,12 @@ public class LoanDto {
     public String getStudentId() { return studentId; }
     public void setStudentId(String studentId) { this.studentId = studentId; }
 
+    public String getUserDepartment() { return userDepartment; }
+    public void setUserDepartment(String userDepartment) { this.userDepartment = userDepartment; }
+
+    public String getUserPhone() { return userPhone; }
+    public void setUserPhone(String userPhone) { this.userPhone = userPhone; }
+
     public Long getBookId() { return bookId; }
     public void setBookId(Long bookId) { this.bookId = bookId; }
 
@@ -57,6 +70,21 @@ public class LoanDto {
 
     public String getAuthorName() { return authorName; }
     public void setAuthorName(String authorName) { this.authorName = authorName; }
+
+    public String getCategoryName() { return categoryName; }
+    public void setCategoryName(String categoryName) { this.categoryName = categoryName; }
+
+    public String getShelfNumber() { return shelfNumber; }
+    public void setShelfNumber(String shelfNumber) { this.shelfNumber = shelfNumber; }
+
+    public String getLocation() { return location; }
+    public void setLocation(String location) { this.location = location; }
+
+    public Integer getAvailableCopies() { return availableCopies; }
+    public void setAvailableCopies(Integer availableCopies) { this.availableCopies = availableCopies; }
+
+    public Integer getTotalCopies() { return totalCopies; }
+    public void setTotalCopies(Integer totalCopies) { this.totalCopies = totalCopies; }
 
     public LocalDate getIssueDate() { return issueDate; }
     public void setIssueDate(LocalDate issueDate) { this.issueDate = issueDate; }

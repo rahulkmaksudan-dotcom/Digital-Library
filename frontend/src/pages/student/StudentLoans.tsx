@@ -9,12 +9,12 @@ import { EmptyState } from '../../components/EmptyState';
 import { useToast } from '../../context/ToastContext';
 
 interface StudentLoansProps {
-  initialTab?: 'active' | 'history';
+  initialTab?: 'active' | 'history' | 'pending';
 }
 
 export const StudentLoans: React.FC<StudentLoansProps> = ({ initialTab = 'active' }) => {
   const { showToast } = useToast();
-  const [activeTab, setActiveTab] = useState<'active' | 'history'>(initialTab);
+  const [activeTab, setActiveTab] = useState<'active' | 'history' | 'pending'>(initialTab);
   const [loans, setLoans] = useState<Loan[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
@@ -33,6 +33,11 @@ export const StudentLoans: React.FC<StudentLoansProps> = ({ initialTab = 'active
         setLoans(res.content);
         setTotalPages(res.totalPages);
         setTotalElements(res.totalElements);
+      } else if (activeTab === 'pending') {
+        const res = await loanService.getMyPendingRequests(page, 10);
+        setLoans(res.content);
+        setTotalPages(res.totalPages);
+        setTotalElements(res.totalElements);
       } else {
         const res = await loanService.getMyHistory(undefined, page, 10);
         setLoans(res.content);
@@ -47,6 +52,20 @@ export const StudentLoans: React.FC<StudentLoansProps> = ({ initialTab = 'active
   };
 
   const getStatusBadge = (status: string, isOverdue: boolean) => {
+    if (status === 'PENDING') {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+          <Clock className="w-3.5 h-3.5" /> Awaiting Staff Grant
+        </span>
+      );
+    }
+    if (status === 'REVOKED') {
+      return (
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+          <AlertTriangle className="w-3.5 h-3.5" /> Declined / Revoked
+        </span>
+      );
+    }
     if (isOverdue || status === 'OVERDUE') {
       return (
         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
@@ -81,11 +100,17 @@ export const StudentLoans: React.FC<StudentLoansProps> = ({ initialTab = 'active
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            {activeTab === 'active' ? 'My Borrowed Books' : 'Borrowing History'}
+            {activeTab === 'active'
+              ? 'My Borrowed Books'
+              : activeTab === 'pending'
+              ? 'Pending Borrow Requests'
+              : 'Borrowing History'}
           </h1>
           <p className="text-sm text-slate-500 mt-1">
             {activeTab === 'active'
               ? 'Keep track of currently issued books, due dates, and renewals.'
+              : activeTab === 'pending'
+              ? 'Books you requested that are awaiting approval from the Library Committee / Librarian.'
               : 'Complete archive of all your past library circulations.'}
           </p>
         </div>
@@ -97,7 +122,7 @@ export const StudentLoans: React.FC<StudentLoansProps> = ({ initialTab = 'active
               setActiveTab('active');
               setPage(0);
             }}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition ${
+            className={`px-3.5 py-2 rounded-lg text-xs font-bold transition ${
               activeTab === 'active'
                 ? 'bg-white text-dps-700 shadow-sm'
                 : 'text-slate-600 hover:text-slate-900'
@@ -107,10 +132,23 @@ export const StudentLoans: React.FC<StudentLoansProps> = ({ initialTab = 'active
           </button>
           <button
             onClick={() => {
+              setActiveTab('pending');
+              setPage(0);
+            }}
+            className={`px-3.5 py-2 rounded-lg text-xs font-bold transition ${
+              activeTab === 'pending'
+                ? 'bg-white text-dps-700 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            Pending Requests
+          </button>
+          <button
+            onClick={() => {
               setActiveTab('history');
               setPage(0);
             }}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition ${
+            className={`px-3.5 py-2 rounded-lg text-xs font-bold transition ${
               activeTab === 'history'
                 ? 'bg-white text-dps-700 shadow-sm'
                 : 'text-slate-600 hover:text-slate-900'
@@ -153,10 +191,18 @@ export const StudentLoans: React.FC<StudentLoansProps> = ({ initialTab = 'active
       ) : loans.length === 0 ? (
         <div className="bg-white rounded-2xl border border-slate-200 p-12">
           <EmptyState
-            title={activeTab === 'active' ? 'No active loans' : 'No borrowing history'}
+            title={
+              activeTab === 'active'
+                ? 'No active loans'
+                : activeTab === 'pending'
+                ? 'No pending borrow requests'
+                : 'No borrowing history'
+            }
             description={
               activeTab === 'active'
                 ? "You don't have any books currently borrowed from the library."
+                : activeTab === 'pending'
+                ? "You don't have any book borrow requests currently awaiting approval."
                 : 'You have not borrowed any books yet.'
             }
             actionText="Explore Library Catalog"
