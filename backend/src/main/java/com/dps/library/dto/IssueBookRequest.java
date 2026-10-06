@@ -5,7 +5,6 @@ import java.time.LocalDate;
 
 public class IssueBookRequest {
 
-    @NotNull(message = "User ID is required")
     private Long userId;
 
     @NotNull(message = "Book ID is required")

@@ -79,8 +79,8 @@ public class LoanController {
             a.getAuthority().equals("ROLE_FACULTY")
         );
 
-        if (!isStaffOrFaculty) {
-            // Students can only borrow books for themselves
+        if (!isStaffOrFaculty || request.getUserId() == null) {
+            // Students can only borrow books for themselves, or default to current user if omitted
             request.setUserId(currentUser.getId());
         }
 

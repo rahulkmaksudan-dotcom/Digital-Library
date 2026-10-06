@@ -55,8 +55,12 @@ public class LoanService {
 
     @Transactional
     public LoanDto issueBook(IssueBookRequest request, Long staffId, String staffEmail) {
-        User student = userRepository.findById(request.getUserId())
-            .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + request.getUserId()));
+        Long studentId = request.getUserId() != null ? request.getUserId() : staffId;
+        if (studentId == null) {
+            throw new BadRequestException("User ID is required to issue a book.");
+        }
+        User student = userRepository.findById(studentId)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + studentId));
 
         if (!student.getActive()) {
             throw new BadRequestException("Student account is inactive and cannot borrow books.");

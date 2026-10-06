@@ -196,6 +196,7 @@ export const loanService = {
   },
 
   requestLoan: async (data: {
+    userId?: number;
     bookId: number;
     loanDays?: number;
     notes?: string;

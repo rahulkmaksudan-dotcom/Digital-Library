@@ -115,6 +115,7 @@ export const BookDetails: React.FC = () => {
     setBorrowing(true);
     try {
       const loan = await loanService.requestLoan({
+        userId: user.id,
         bookId: book.id,
         loanDays: 10,
         notes: 'Borrow request submitted via catalog',
